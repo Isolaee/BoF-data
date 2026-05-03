@@ -116,7 +116,19 @@ def main():
     args = parse_args()
     spark = SparkSession.builder.getOrCreate()
 
-    catalog = args.catalog if args.catalog else spark.catalog.currentCatalog()
+    if args.catalog:
+        catalog = args.catalog
+    else:
+        _system = {"system", "__databricks_internal", "spark_catalog"}
+        available = [
+            r.catalog for r in spark.sql("SHOW CATALOGS").collect()
+            if r.catalog not in _system
+        ]
+        print(f"Available catalogs: {available}")
+        if not available:
+            raise RuntimeError("No user catalogs found. Pass --catalog explicitly.")
+        catalog = available[0]
+
     print(f"Using catalog: {catalog}")
 
     full_table = f"{catalog}.{args.schema}.loan_observations"
