@@ -119,11 +119,10 @@ def main():
     if args.catalog:
         catalog = args.catalog
     else:
-        _system = {"system", "__databricks_internal", "spark_catalog"}
-        available = [
-            r.catalog for r in spark.sql("SHOW CATALOGS").collect()
-            if r.catalog not in _system
-        ]
+        _readonly = {"system", "__databricks_internal", "spark_catalog", "samples"}
+        all_catalogs = [r.catalog for r in spark.sql("SHOW CATALOGS").collect()]
+        available = [c for c in all_catalogs if c not in _readonly]
+        print(f"All catalogs: {all_catalogs} → using: {available}")
         print(f"Available catalogs: {available}")
         if not available:
             raise RuntimeError("No user catalogs found. Pass --catalog explicitly.")

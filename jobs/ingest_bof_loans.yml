@@ -15,7 +15,7 @@ resources:
         - name: end_period
           default: ""   # empty = latest available
         - name: catalog
-          default: ""   # empty = auto-detect from session
+          default: workspace
         - name: schema
           default: bof
 
