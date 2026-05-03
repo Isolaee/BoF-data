@@ -25,7 +25,7 @@ def parse_args():
     p.add_argument("--dataset_id", default="MFI_PUBL")
     p.add_argument("--start_period", default="")
     p.add_argument("--end_period", default="")
-    p.add_argument("--catalog", default="main")
+    p.add_argument("--catalog", default="hive_metastore")
     p.add_argument("--schema", default="bof")
     return p.parse_args()
 
