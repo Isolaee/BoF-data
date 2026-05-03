@@ -1,0 +1,51 @@
+resources:
+  jobs:
+    ingest_bof_loans:
+      name: "[${bundle.target}] ingest-bof-loans"
+      description: "Manual ingest of Bank of Finland loan observations (MFI_PUBL) into Delta."
+
+      # No schedule — manual trigger only
+      trigger: {}
+
+      parameters:
+        - name: dataset_id
+          default: MFI_PUBL
+        - name: start_period
+          default: ""   # empty = full history
+        - name: end_period
+          default: ""   # empty = latest available
+        - name: catalog
+          default: main
+        - name: schema
+          default: bof
+
+      tasks:
+        - task_key: ingest
+          spark_python_task:
+            python_file: ../src/ingest_bof_loans.py
+            parameters:
+              - "--dataset_id={{job.parameters.dataset_id}}"
+              - "--start_period={{job.parameters.start_period}}"
+              - "--end_period={{job.parameters.end_period}}"
+              - "--catalog={{job.parameters.catalog}}"
+              - "--schema={{job.parameters.schema}}"
+
+          new_cluster:
+            spark_version: "15.4.x-scala2.12"
+            node_type_id: Standard_DS3_v2
+            num_workers: 1
+            spark_conf:
+              spark.databricks.delta.schema.autoMerge.enabled: "true"
+
+          libraries:
+            - pypi:
+                package: requests>=2.31.0
+
+      email_notifications:
+        on_failure:
+          - "{{var.alert_email}}"
+
+variables:
+  alert_email:
+    description: Email address for failure alerts (optional)
+    default: ""

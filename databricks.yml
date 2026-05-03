@@ -1,0 +1,21 @@
+bundle:
+  name: bof-data
+
+include:
+  - jobs/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: ${var.workspace_host}
+
+  prod:
+    mode: production
+    workspace:
+      host: ${var.workspace_host}
+
+variables:
+  workspace_host:
+    description: Databricks workspace URL (e.g. https://adb-xxxx.azuredatabricks.net)
