@@ -158,7 +158,14 @@ def main():
     DeltaTable.forName(spark, full_table) \
         .alias("target") \
         .merge(df.alias("source"), MERGE_CONDITION) \
-        .whenNotMatchedInsertAll() \
+        .whenNotMatchedInsert(values={
+            "target.dataset_id":  "source.dataset_id",
+            "target.series_name": "source.series_name",
+            "target.period":      "source.period",
+            "target.period_code": "source.period_code",
+            "target.value":       "source.value",
+            "target.ingested_at": "source.ingested_at",
+        }) \
         .execute()
 
     total = spark.sql(
