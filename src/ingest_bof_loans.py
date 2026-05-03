@@ -25,7 +25,7 @@ def parse_args():
     p.add_argument("--dataset_id", default="MFI_PUBL")
     p.add_argument("--start_period", default="")
     p.add_argument("--end_period", default="")
-    p.add_argument("--catalog", default="hive_metastore")
+    p.add_argument("--catalog", default="")
     p.add_argument("--schema", default="bof")
     return p.parse_args()
 
@@ -114,10 +114,13 @@ def ensure_table(spark: SparkSession, full_table: str):
 
 def main():
     args = parse_args()
-    full_table = f"{args.catalog}.{args.schema}.loan_observations"
-
     spark = SparkSession.builder.getOrCreate()
-    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {args.catalog}.{args.schema}")
+
+    catalog = args.catalog if args.catalog else spark.catalog.currentCatalog()
+    print(f"Using catalog: {catalog}")
+
+    full_table = f"{catalog}.{args.schema}.loan_observations"
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog}.{args.schema}")
     ensure_table(spark, full_table)
 
     print(f"Fetching observations: dataset={args.dataset_id} "

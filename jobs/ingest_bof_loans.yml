@@ -15,7 +15,7 @@ resources:
         - name: end_period
           default: ""   # empty = latest available
         - name: catalog
-          default: hive_metastore
+          default: ""   # empty = auto-detect from session
         - name: schema
           default: bof
 
