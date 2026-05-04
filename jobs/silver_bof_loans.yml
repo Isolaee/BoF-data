@@ -1,0 +1,41 @@
+resources:
+  jobs:
+    silver_bof_loans:
+      name: "[${bundle.target}] silver-bof-loans"
+      description: "Transform bronze loan_observations into structured silver (parses SDMX dimensions, casts period to DATE)."
+
+      trigger: {}
+
+      parameters:
+        - name: catalog
+          default: workspace
+        - name: src_schema
+          default: bof
+        - name: dst_schema
+          default: bof_silver
+
+      tasks:
+        - task_key: transform
+          depends_on: []
+          spark_python_task:
+            python_file: ../src/silver_bof_loans.py
+            parameters:
+              - "--catalog={{job.parameters.catalog}}"
+              - "--src_schema={{job.parameters.src_schema}}"
+              - "--dst_schema={{job.parameters.dst_schema}}"
+
+          new_cluster:
+            spark_version: "15.4.x-scala2.12"
+            node_type_id: Standard_DS3_v2
+            num_workers: 1
+            spark_conf:
+              spark.databricks.delta.schema.autoMerge.enabled: "true"
+
+      email_notifications:
+        on_failure:
+          - "{{var.alert_email}}"
+
+variables:
+  alert_email:
+    description: Email address for failure alerts (optional)
+    default: ""
